@@ -1,6 +1,8 @@
-# Welcome to your Lovable project
+# Strategic Intelligence Dashboard
 
-## Project info
+## Project Info
+
+This dashboard is now **fully public**—no login or registration required. Anyone can access all features directly.
 
 **URL**: https://lovable.dev/projects/74212fb4-2fe4-497c-9af0-6435c068e524
 
@@ -70,5 +72,5 @@ Yes, you can!
 
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide) 
 "# future_nexus_mpgov" 
