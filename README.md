@@ -4,21 +4,13 @@
 
 This dashboard is now **fully public**—no login or registration required. Anyone can access all features directly.
 
-**URL**: https://lovable.dev/projects/74212fb4-2fe4-497c-9af0-6435c068e524
-
 ## How can I edit this code?
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/74212fb4-2fe4-497c-9af0-6435c068e524) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
+You can edit this project using your preferred IDE or directly in GitHub.
 
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+If you want to work locally using your own IDE, you can clone this repo and push changes.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -64,13 +56,8 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/74212fb4-2fe4-497c-9af0-6435c068e524) and click on Share -> Publish.
+You can deploy this project using your preferred static hosting provider (e.g., Vercel, Netlify, GitHub Pages, etc.).
 
-## Can I connect a custom domain to my Lovable project?
+## Can I connect a custom domain?
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide) 
-"# future_nexus_mpgov" 
+Yes, you can! Follow your hosting provider's instructions to connect a custom domain. 
