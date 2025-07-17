@@ -3,12 +3,35 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, Bot, Leaf, Zap, Globe, ChevronRight, ArrowUpRight, Building, Users, Battery, Heart, LogOut, User } from 'lucide-react';
+import { TrendingUp, Bot, Leaf, Zap, Globe, ChevronRight, ArrowUpRight, Building, Users, Battery, Heart, LogOut, User, Sun, Moon } from 'lucide-react';
 import { OpportunityMatrix } from '@/components/OpportunityMatrix';
 import { MarketCharts } from '@/components/MarketCharts';
 import { GeographicMap } from '@/components/GeographicMap';
 import { MegatrendCard } from '@/components/MegatrendCard';
-import { useAuth } from '@/hooks/useAuth';
+
+const toggleTheme = () => {
+  const html = document.documentElement;
+  if (html.classList.contains('dark')) {
+    html.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
+  } else {
+    html.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  }
+};
+
+const getInitialTheme = () => {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('theme');
+    if (stored) {
+      if (stored === 'dark') document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
+  }
+};
+getInitialTheme();
 
 const Index = () => {
   const [selectedView, setSelectedView] = useState('overview');
@@ -88,6 +111,18 @@ const Index = () => {
                 </Badge>
                 {/* Removed user role badge */}
               </div>
+              {/* Theme toggle button */}
+              <button
+                onClick={toggleTheme}
+                className="ml-4 p-2 rounded-full bg-muted hover:bg-accent transition-colors border border-border"
+                aria-label="Toggle theme"
+              >
+                {typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? (
+                  <Sun className="h-5 w-5 text-yellow-400" />
+                ) : (
+                  <Moon className="h-5 w-5 text-blue-500" />
+                )}
+              </button>
               {/* Removed user welcome and sign out button */}
             </div>
           </div>
