@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FilterBar } from '@/components/FilterBar';
 import { KpiCard } from '@/components/KpiCard';
 import { MapDashboard } from '@/components/MapDashboard';
 import { useRealtimeData } from '@/hooks/useRealtimeData';
+import { supabase } from '@/integrations/supabase/client';
 
 const cities = ['Bhopal', 'Indore', 'Gwalior', 'Jabalpur'];
 
@@ -34,6 +36,15 @@ export default function DashboardPage() {
     { title: 'Network Utilization %', value: kpis.avgUtil, unit: '%', trend: 'neutral' as const },
     { title: 'CO₂ Emissions Saved', value: kpis.co2Saved, unit: 't', trend: 'up' as const, description: 'Tonnes' },
   ];
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate('/login');
+      }
+    });
+  }, [navigate]);
 
   return (
     <main className="min-h-screen bg-background px-2 py-4 md:px-4 md:py-8" aria-label="Dashboard main content">
