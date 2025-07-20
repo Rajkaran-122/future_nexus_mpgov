@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface Station {
   id: string;
@@ -27,25 +28,21 @@ export function useRealtimeData(city: string, dateRange: { start: string; end: s
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let channel: any;
-    setLoading(true);
-
-    async function fetchData() {
-      // Fetch stations for the selected city
-      let { data: stationsData } = await supabase
+    let isMounted = true;
+    const fetchData = async () => {
+      const { data: stationsData } = await supabase
         .from('stations')
         .select('*')
         .eq('city', city);
 
-      // Fetch swaps for the selected city and date range
-      let { data: swapsData } = await supabase
+      const { data: swapsData } = await supabase
         .from('swaps_log')
         .select('*')
         .eq('city', city)
         .gte('timestamp', dateRange.start)
         .lte('timestamp', dateRange.end);
 
-      // Calculate KPIs
+      if (!isMounted) return;
       const totalEVs = stationsData?.length ? stationsData.length * 1500 : 0;
       const totalSwaps = swapsData?.length || 0;
       const avgUtil = stationsData?.length
@@ -62,19 +59,19 @@ export function useRealtimeData(city: string, dateRange: { start: string; end: s
         trend: 'up', // TODO: Calculate trend based on previous period
       });
       setLoading(false);
-    }
+    };
 
     fetchData();
 
-    // Subscribe to real-time updates
-    channel = supabase
+    const channel: RealtimeChannel = supabase
       .channel('dashboard-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'stations' }, fetchData)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'swaps_log' }, fetchData)
       .subscribe();
 
     return () => {
-      channel && supabase.removeChannel(channel);
+      isMounted = false;
+      supabase.removeChannel(channel);
     };
   }, [city, dateRange.start, dateRange.end]);
 
