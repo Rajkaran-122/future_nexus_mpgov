@@ -2,35 +2,39 @@
 // npm install react-map-gl
 // npm install --save-dev @types/react-map-gl
 import React, { useState } from 'react';
-import Map, { Marker, Popup, Source, Layer, ViewState } from 'react-map-gl';
+import Map, { Source, Layer, ViewState, Marker } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Station } from '@/hooks/useRealtimeData';
-import { MapLegend } from './MapLegend';
-import melaZonesGeojson from '@/data/melaZones.geojson';
+import ghatsGeojson from '@/data/ghats.geojson';
+import parkingZonesGeojson from '@/data/parkingZones.geojson';
+import crowdHeatmapGeojson from '@/data/crowdHeatmap.geojson';
+import emergencyRoutesGeojson from '@/data/emergencyRoutes.geojson';
+import { Shield } from 'lucide-react';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN!;
 
-const statusColor = {
-  online: 'bg-green-500',
-  offline: 'bg-red-500',
-  maintenance: 'bg-yellow-400',
-};
-
 interface MapDashboardProps {
-  city?: string;
-  stations?: Station[];
+  showEmergency?: boolean;
 }
 
-export const MapDashboard: React.FC<MapDashboardProps> = ({ city, stations = [] }) => {
-  const [hovered, setHovered] = useState<Station | null>(null);
-  const [showMelaZones, setShowMelaZones] = useState(true);
-  // Ujjain Shipra riverfront view
+export const MapDashboard: React.FC<MapDashboardProps> = ({ showEmergency }) => {
   const initialViewState: ViewState = {
     longitude: 75.7781,
     latitude: 23.1824,
     zoom: 13.5,
   };
   const [viewState, setViewState] = useState<ViewState>(initialViewState);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+
+  // Extract police points from emergencyRoutesGeojson
+  const policePoints = emergencyRoutesGeojson.features.filter(
+    (f): f is typeof f & { geometry: { type: 'Point'; coordinates: [number, number] } } =>
+      f.properties?.type === 'police' &&
+      f.geometry.type === 'Point' &&
+      Array.isArray(f.geometry.coordinates) &&
+      f.geometry.coordinates.length === 2 &&
+      typeof f.geometry.coordinates[0] === 'number' &&
+      typeof f.geometry.coordinates[1] === 'number'
+  );
 
   return (
     <div className="w-full h-[500px] rounded-xl overflow-hidden shadow relative" tabIndex={0} aria-label="Map of Ujjain and Shipra riverfront">
@@ -42,56 +46,105 @@ export const MapDashboard: React.FC<MapDashboardProps> = ({ city, stations = [] 
         width="100%"
         height="100%"
       >
-        {/* Mela Zones Layer */}
-        {showMelaZones && (
-          <Source id="mela-zones" type="geojson" data={melaZonesGeojson}>
+        {/* Ghats Layer */}
+        <Source id="ghats" type="geojson" data={ghatsGeojson}>
+          <Layer
+            id="ghats-fill"
+            type="fill"
+            paint={{ 'fill-color': '#a21caf', 'fill-opacity': 0.18 }}
+          />
+          <Layer
+            id="ghats-outline"
+            type="line"
+            paint={{ 'line-color': '#a21caf', 'line-width': 2 }}
+          />
+        </Source>
+        {/* Parking Zones Layer */}
+        <Source id="parking-zones" type="geojson" data={parkingZonesGeojson}>
+          <Layer
+            id="parking-zones-fill"
+            type="fill"
+            paint={{ 'fill-color': '#f59e42', 'fill-opacity': 0.18 }}
+          />
+          <Layer
+            id="parking-zones-outline"
+            type="line"
+            paint={{ 'line-color': '#f59e42', 'line-width': 2 }}
+          />
+        </Source>
+        {/* Crowd Density Heatmap Layer */}
+        {showHeatmap && (
+          <Source id="crowd-heatmap" type="geojson" data={crowdHeatmapGeojson}>
             <Layer
-              id="mela-zones-fill"
-              type="fill"
-              paint={{ 'fill-color': '#f59e42', 'fill-opacity': 0.25 }}
-            />
-            <Layer
-              id="mela-zones-outline"
-              type="line"
-              paint={{ 'line-color': '#f59e42', 'line-width': 2 }}
+              id="crowd-heatmap-layer"
+              type="heatmap"
+              paint={{
+                'heatmap-weight': ["get", "density"],
+                'heatmap-intensity': 2,
+                'heatmap-radius': 32,
+                'heatmap-color': [
+                  'interpolate',
+                  ['linear'],
+                  ['heatmap-density'],
+                  0, 'rgba(255,255,178,0)',
+                  0.2, 'rgba(254,204,92,0.7)',
+                  0.4, 'rgba(253,141,60,0.8)',
+                  0.6, 'rgba(240,59,32,0.9)',
+                  1, 'rgba(189,0,38,1)'
+                ],
+                'heatmap-opacity': 0.7
+              }}
             />
           </Source>
         )}
-        {stations.map(station => (
-          <Marker
-            key={station.id}
-            longitude={station.longitude}
-            latitude={station.latitude}
-          >
-            <div
-              className={`w-4 h-4 rounded-full border-2 border-white shadow ${statusColor[station.status]}`}
-              title={station.name}
-              onMouseEnter={() => setHovered(station)}
-              onMouseLeave={() => setHovered(null)}
-              tabIndex={0}
-              aria-label={`${station.name}, status: ${station.status}, utilization: ${station.utilization}%`}
+        {/* Emergency Response: Routes and Police Units */}
+        {showEmergency && (
+          <Source id="emergency-routes" type="geojson" data={emergencyRoutesGeojson}>
+            <Layer
+              id="emergency-routes-line"
+              type="line"
+              filter={["==", "type", "route"]}
+              paint={{ 'line-color': '#2563eb', 'line-width': 6, 'line-opacity': 0.85 }}
             />
-          </Marker>
-        ))}
-        {hovered && (
-          <Popup
-            longitude={hovered.longitude}
-            latitude={hovered.latitude}
-            closeButton={false}
-            anchor="top"
-            onClose={() => setHovered(null)}
-          >
-            <div className="text-sm font-semibold mb-1">{hovered.name}</div>
-            <div className="text-xs mb-1">Status: <span className={`font-bold ${hovered.status === 'online' ? 'text-green-500' : hovered.status === 'offline' ? 'text-red-500' : 'text-yellow-500'}`}>{hovered.status}</span></div>
-            <div className="text-xs">Utilization (24h): <span className="font-bold">{hovered.utilization}%</span></div>
-          </Popup>
+            {/* Police unit icons as markers */}
+            {policePoints.map((f, i) => (
+              <Marker
+                key={i}
+                longitude={f.geometry.coordinates[0]}
+                latitude={f.geometry.coordinates[1]}
+              >
+                <Shield className="h-7 w-7 text-blue-700 drop-shadow-lg" aria-label={f.properties.name} />
+              </Marker>
+            ))}
+          </Source>
         )}
       </Map>
-      <div className="absolute top-4 right-4 z-10">
-        <MapLegend
-          showMelaZones={showMelaZones}
-          setShowMelaZones={setShowMelaZones}
-        />
+      {/* Map Legend with Crowd Density Toggle */}
+      <div className="absolute top-4 right-4 z-10 bg-white/90 rounded-lg shadow p-4 min-w-[200px]">
+        <div className="font-semibold mb-2 text-sm">Map Layers</div>
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showHeatmap}
+              onChange={e => setShowHeatmap(e.target.checked)}
+              className="accent-red-600"
+            />
+            <span>Crowd Density</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-not-allowed opacity-60">
+            <input type="checkbox" disabled />
+            <span>Ghats</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-not-allowed opacity-60">
+            <input type="checkbox" disabled />
+            <span>Parking Zones</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-not-allowed opacity-60">
+            <input type="checkbox" disabled />
+            <span>EV-Only Zones</span>
+          </label>
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FilterBar } from '@/components/FilterBar';
 import { KpiCard } from '@/components/KpiCard';
 import { MapDashboard } from '@/components/MapDashboard';
+import { EmergencyResponseModal } from '@/components/EmergencyResponseModal';
 import { supabase } from '@/integrations/supabase/client';
 import { Bus, Car, ParkingCircle, Leaf, Trash2 } from 'lucide-react';
+import { toast, Toaster } from 'sonner';
 
 const cities = ['Ujjain'];
 
@@ -29,6 +31,7 @@ function MapSkeleton() {
 export default function DashboardPage() {
   const [dateRange, setDateRange] = useState({ start: '2024-07-01', end: '2024-07-10' });
   const [city, setCity] = useState(cities[0]);
+  const [showEmergency, setShowEmergency] = useState(false);
   // Placeholder static data for Simhastha KPIs
   const kpiList = [
     { title: 'Live Pilgrim Vehicle Inflow', value: 1240, unit: '', trend: 'up' as const, icon: Car },
@@ -47,8 +50,40 @@ export default function DashboardPage() {
     });
   }, [navigate]);
 
+  // Predictive alert logic
+  const triggerCriticalAlert = useCallback(() => {
+    toast(
+      <div
+        className="flex flex-col cursor-pointer"
+        onClick={() => setShowEmergency(true)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setShowEmergency(true); }}
+      >
+        <span className="text-lg font-bold text-red-700">🚨 CRITICAL ALERT: Ram Ghat</span>
+        <span className="text-sm text-foreground">Crowd density has reached <b>95%</b> of safe capacity.<br/>Predicted time to critical congestion: <b>15 minutes</b>.</span>
+      </div>,
+      {
+        duration: 10000,
+        className: 'bg-white border-l-4 border-red-600 shadow-lg cursor-pointer',
+      }
+    );
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        triggerCriticalAlert();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [triggerCriticalAlert]);
+
   return (
     <main className="min-h-screen bg-background px-2 py-4 md:px-4 md:py-8" aria-label="Dashboard main content">
+      <Toaster position="top-center" richColors closeButton />
       <div className="max-w-6xl mx-auto">
         {/* Simhastha 2028 Header */}
         <header className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 border-b pb-4">
@@ -78,8 +113,10 @@ export default function DashboardPage() {
           ))}
         </section>
         <section aria-label="E-Mobility Map" className="mb-8 focus:outline-none" tabIndex={0}>
-          <MapSkeleton /> {/* Replace with <MapDashboard ... /> when ready */}
+          <MapDashboard showEmergency={showEmergency} />
         </section>
+        <EmergencyResponseModal show={showEmergency} onClose={() => setShowEmergency(false)} />
+        {/* Emergency Response UI will be implemented in the next step */}
       </div>
     </main>
   );

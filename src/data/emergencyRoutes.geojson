@@ -1,0 +1,41 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "type": "route" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [75.779, 23.183], [75.780, 23.184], [75.781, 23.185]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "type": "route" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [75.778, 23.182], [75.779, 23.183], [75.780, 23.185]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "type": "police", "name": "Ram Ghat Police" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [75.779, 23.183]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "type": "police", "name": "Shipra Bridge Patrol" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [75.780, 23.184]
+      }
+    }
+  ]
+} 

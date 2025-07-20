@@ -1,0 +1,21 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Parking Zone 1" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [75.776, 23.180],
+            [75.778, 23.180],
+            [75.778, 23.182],
+            [75.776, 23.182],
+            [75.776, 23.180]
+          ]
+        ]
+      }
+    }
+  ]
+} 

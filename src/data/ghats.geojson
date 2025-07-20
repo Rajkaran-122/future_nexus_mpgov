@@ -1,0 +1,21 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Ram Ghat" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [75.779, 23.183],
+            [75.781, 23.183],
+            [75.781, 23.185],
+            [75.779, 23.185],
+            [75.779, 23.183]
+          ]
+        ]
+      }
+    }
+  ]
+} 
