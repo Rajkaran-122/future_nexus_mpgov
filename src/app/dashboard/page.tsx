@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { FilterBar } from '@/components/FilterBar';
 import { KpiCard } from '@/components/KpiCard';
 import { MapDashboard } from '@/components/MapDashboard';
-import { useRealtimeData } from '@/hooks/useRealtimeData';
 import { supabase } from '@/integrations/supabase/client';
+import { Bus, Car, ParkingCircle, Leaf, Trash2 } from 'lucide-react';
 
-const cities = ['Bhopal', 'Indore', 'Gwalior', 'Jabalpur'];
+const cities = ['Ujjain'];
 
 function KpiSkeleton() {
   return (
@@ -29,12 +29,13 @@ function MapSkeleton() {
 export default function DashboardPage() {
   const [dateRange, setDateRange] = useState({ start: '2024-07-01', end: '2024-07-10' });
   const [city, setCity] = useState(cities[0]);
-  const { stations, kpis, loading } = useRealtimeData(city);
+  // Placeholder static data for Simhastha KPIs
   const kpiList = [
-    { title: 'Total Active EVs', value: kpis.totalEVs, unit: '', trend: 'up' as const },
-    { title: 'Battery Swaps (24h)', value: kpis.totalSwaps, unit: '', trend: 'up' as const },
-    { title: 'Network Utilization %', value: kpis.avgUtil, unit: '%', trend: 'neutral' as const },
-    { title: 'CO₂ Emissions Saved', value: kpis.co2Saved, unit: 't', trend: 'up' as const, description: 'Tonnes' },
+    { title: 'Live Pilgrim Vehicle Inflow', value: 1240, unit: '', trend: 'up' as const, icon: Car },
+    { title: 'E-Shuttle Bus Frequency', value: 38, unit: '/hr', trend: 'neutral' as const, icon: Bus },
+    { title: 'Parking Zone Occupancy %', value: 67, unit: '%', trend: 'up' as const, icon: ParkingCircle },
+    { title: 'AQI at Major Ghats', value: 92, unit: '', trend: 'down' as const, icon: Leaf, description: 'Air Quality Index' },
+    { title: 'Solid Waste Cleared', value: 18, unit: 't', trend: 'up' as const, icon: Trash2, description: 'Tonnes' },
   ];
 
   const navigate = useNavigate();
@@ -49,6 +50,19 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-background px-2 py-4 md:px-4 md:py-8" aria-label="Dashboard main content">
       <div className="max-w-6xl mx-auto">
+        {/* Simhastha 2028 Header */}
+        <header className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 border-b pb-4">
+          <div className="flex items-center gap-4">
+            {/* Placeholder for Simhastha 2028 logo */}
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center text-xl font-bold">Logo</div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">Simhastha Smart & Green Command Center</h1>
+              <p className="text-sm text-muted-foreground">Kumbh Mela 2028 • Ujjain, Madhya Pradesh</p>
+            </div>
+          </div>
+          {/* Placeholder for MP Government emblem */}
+          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center text-xs font-semibold">MP Emblem</div>
+        </header>
         <nav aria-label="Dashboard filters">
           <FilterBar
             dateRange={dateRange}
@@ -58,15 +72,13 @@ export default function DashboardPage() {
             cities={cities}
           />
         </nav>
-        <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8" aria-label="Key Performance Indicators">
-          {loading
-            ? Array.from({ length: 4 }).map((_, i) => <KpiSkeleton key={i} />)
-            : kpiList.map((kpi, i) => (
-                <KpiCard key={i} {...kpi} />
-              ))}
+        <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8" aria-label="Key Performance Indicators">
+          {kpiList.map((kpi, i) => (
+            <KpiCard key={i} {...kpi} />
+          ))}
         </section>
         <section aria-label="E-Mobility Map" className="mb-8 focus:outline-none" tabIndex={0}>
-          {loading ? <MapSkeleton /> : <MapDashboard city={city} stations={stations} />}
+          <MapSkeleton /> {/* Replace with <MapDashboard ... /> when ready */}
         </section>
       </div>
     </main>

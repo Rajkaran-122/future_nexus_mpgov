@@ -1,0 +1,21 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Mela Zone 1" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [75.775, 23.185],
+            [75.780, 23.185],
+            [75.780, 23.190],
+            [75.775, 23.190],
+            [75.775, 23.185]
+          ]
+        ]
+      }
+    }
+  ]
+} 

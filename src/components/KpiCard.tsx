@@ -7,9 +7,10 @@ interface KpiCardProps {
   unit?: string;
   trend?: 'up' | 'down' | 'neutral';
   description?: string;
+  icon?: React.ElementType;
 }
 
-export const KpiCard: React.FC<KpiCardProps> = ({ title, value, unit, trend = 'neutral', description }) => {
+export const KpiCard: React.FC<KpiCardProps> = ({ title, value, unit, trend = 'neutral', description, icon: Icon }) => {
   const [displayValue, setDisplayValue] = useState(0);
   const ref = useRef<number>(0);
 
@@ -33,6 +34,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({ title, value, unit, trend = 'n
     <div className="bg-card rounded-xl shadow p-4 flex flex-col items-start min-w-[180px] transition-colors duration-300" role="status" aria-label={title} tabIndex={0}>
       <div className="text-xs text-muted-foreground mb-1 font-medium">{title}</div>
       <div className="flex items-center gap-2">
+        {Icon && <Icon className="h-6 w-6 text-primary" aria-hidden="true" />}
         <span className="text-2xl font-bold text-foreground transition-all duration-300" aria-live="polite">
           {displayValue.toLocaleString()}{unit && <span className="text-base font-normal ml-1">{unit}</span>}
         </span>

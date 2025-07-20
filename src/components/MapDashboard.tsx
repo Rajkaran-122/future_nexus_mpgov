@@ -2,11 +2,13 @@
 // npm install react-map-gl
 // npm install --save-dev @types/react-map-gl
 import React, { useState } from 'react';
-import Map, { Marker, Popup, ViewState } from 'react-map-gl';
+import Map, { Marker, Popup, Source, Layer, ViewState } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { mockStations, Station } from '@/data/mockStations';
+import { Station } from '@/hooks/useRealtimeData';
+import { MapLegend } from './MapLegend';
+import melaZonesGeojson from '@/data/melaZones.geojson';
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN!;
 
 const statusColor = {
   online: 'bg-green-500',
@@ -16,47 +18,45 @@ const statusColor = {
 
 interface MapDashboardProps {
   city?: string;
-  stations: Station[];
+  stations?: Station[];
 }
 
-export const MapDashboard: React.FC<MapDashboardProps> = ({ city, stations }) => {
+export const MapDashboard: React.FC<MapDashboardProps> = ({ city, stations = [] }) => {
   const [hovered, setHovered] = useState<Station | null>(null);
-  // Center on Madhya Pradesh
+  const [showMelaZones, setShowMelaZones] = useState(true);
+  // Ujjain Shipra riverfront view
   const initialViewState: ViewState = {
-    longitude: 78.6569,
-    latitude: 23.2599,
-    zoom: 6.2,
+    longitude: 75.7781,
+    latitude: 23.1824,
+    zoom: 13.5,
   };
-  // Optionally zoom to city
-  const cityCenters: Record<string, { longitude: number; latitude: number; zoom: number }> = {
-    Bhopal: { longitude: 77.4126, latitude: 23.2599, zoom: 10 },
-    Indore: { longitude: 75.8577, latitude: 22.7196, zoom: 10 },
-    Gwalior: { longitude: 78.1689, latitude: 26.2183, zoom: 10 },
-    Jabalpur: { longitude: 79.9864, latitude: 23.1815, zoom: 10 },
-  };
-  const [viewState, setViewState] = useState<ViewState>(
-    city && cityCenters[city] ? cityCenters[city] : initialViewState
-  );
-
-  React.useEffect(() => {
-    if (city && cityCenters[city]) {
-      setViewState(cityCenters[city]);
-    } else {
-      setViewState(initialViewState);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [city]);
+  const [viewState, setViewState] = useState<ViewState>(initialViewState);
 
   return (
-    <div className="w-full h-[500px] rounded-xl overflow-hidden shadow">
+    <div className="w-full h-[500px] rounded-xl overflow-hidden shadow relative" tabIndex={0} aria-label="Map of Ujjain and Shipra riverfront">
       <Map
         mapboxApiAccessToken={MAPBOX_TOKEN}
-        mapStyle="mapbox://styles/mapbox/dark-v11"
+        mapStyle="mapbox://styles/mapbox/light-v11"
         viewState={viewState}
         onViewStateChange={({ viewState }) => setViewState(viewState)}
         width="100%"
         height="100%"
       >
+        {/* Mela Zones Layer */}
+        {showMelaZones && (
+          <Source id="mela-zones" type="geojson" data={melaZonesGeojson}>
+            <Layer
+              id="mela-zones-fill"
+              type="fill"
+              paint={{ 'fill-color': '#f59e42', 'fill-opacity': 0.25 }}
+            />
+            <Layer
+              id="mela-zones-outline"
+              type="line"
+              paint={{ 'line-color': '#f59e42', 'line-width': 2 }}
+            />
+          </Source>
+        )}
         {stations.map(station => (
           <Marker
             key={station.id}
@@ -68,6 +68,8 @@ export const MapDashboard: React.FC<MapDashboardProps> = ({ city, stations }) =>
               title={station.name}
               onMouseEnter={() => setHovered(station)}
               onMouseLeave={() => setHovered(null)}
+              tabIndex={0}
+              aria-label={`${station.name}, status: ${station.status}, utilization: ${station.utilization}%`}
             />
           </Marker>
         ))}
@@ -85,6 +87,12 @@ export const MapDashboard: React.FC<MapDashboardProps> = ({ city, stations }) =>
           </Popup>
         )}
       </Map>
+      <div className="absolute top-4 right-4 z-10">
+        <MapLegend
+          showMelaZones={showMelaZones}
+          setShowMelaZones={setShowMelaZones}
+        />
+      </div>
     </div>
   );
 }; 
